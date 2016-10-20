@@ -201,35 +201,66 @@ void deleteNodeAVL(AVLTree &tree, int value) {
     } else {
         cout << "我找到啦 " << value << " 正在删除 ..." << endl;
         if (tmp->rightNode == NULL) {
-            if (tmpParent == NULL) {
-                tree = tmp->leftNode;
-            } else if (tmp->value > tmpParent->value) {
-                tmpParent->rightNode = tmp->leftNode;
-            } else {
-                tmpParent->leftNode = tmp->leftNode;
+            if (tmp->leftNode == NULL) {
+                logPreOrder(tree);
+                logInOrder(tree);
+                return;
             }
-            nodes.push(tmp->leftNode);
-            delete tmp;
+            AVLTree tmpLeft = tmp->leftNode;
+            tmp->value = tmpLeft->value;
+            tmp->rightNode = tmpLeft->rightNode;
+            tmp->leftNode = tmpLeft->leftNode;
+            tmp->BF -= 1;
+            delete tmpLeft;
+            if (tmp->BF == -2) {
+                bool changeHeight = RotateTree(tmp, -2, value);
+                if (tmpParent == NULL) {
+                    tree = tmp;
+                } else if (tmp->value > tmpParent->value) {
+                    tmpParent->rightNode = tmp;
+                } else {
+                    tmpParent->leftNode = tmp;
+                }
+                if (!changeHeight) {
+                    logPreOrder(tree);
+                    logInOrder(tree);
+                    return;
+                }
+            }
         } else if (tmp->rightNode->leftNode == NULL) {
-            if (tmpParent == NULL) {
-                tree = tmp->rightNode;
-            } else if (tmp->value > tmpParent->value) {
-                tmpParent->rightNode = tmp->rightNode;
-            } else {
-                tmpParent->leftNode = tmp->rightNode;
+            AVLTree tmpRight = tmp->rightNode;
+            tmp->value = tmpRight->value;
+            tmp->rightNode = tmpRight->rightNode;
+            tmp->BF += 1;
+            delete tmpRight;
+            if (tmp->BF == 2) {
+                bool changeHeight = RotateTree(tmp, 2, value);
+                if (tmpParent == NULL) {
+                    tree = tmp;
+                } else if (tmp->value > tmpParent->value) {
+                    tmpParent->rightNode = tmp;
+                } else {
+                    tmpParent->leftNode = tmp;
+                }
+                if (!changeHeight) {
+                    logPreOrder(tree);
+                    logInOrder(tree);
+                    return;
+                }
             }
-            tmp->rightNode->leftNode = tmp->leftNode;
-            nodes.push(tmp->rightNode);
-            delete tmp;
+
+
         } else {
+            nodes.push(tmp);
             AVLTree minTmp = tmp->rightNode;
             nodes.push(minTmp);
             while (minTmp->leftNode != NULL) {
-                minTmp = minTmp ->leftNode ;
+                minTmp = minTmp->leftNode;
                 nodes.push(minTmp);
             }
-            nodes.top()->leftNode = minTmp -> rightNode;
-            tmp ->value = minTmp -> value ;
+            nodes.pop();
+            nodes.top()->leftNode = minTmp->rightNode;
+            tmp->value = minTmp->value;
             delete minTmp;
         }
         cout << "删除成功 " << value << " ..." << endl;
@@ -250,14 +281,17 @@ void deleteNodeAVL(AVLTree &tree, int value) {
                 //当旋转后高度不变，则停止回溯
                 if (bf == 1 || bf == -1) {
                     break;
-                } else if (!RotateTree(bfTmp, bf, value)) {
-                    if (nodes.empty()) {
-                        tree = bfTmp;
-                    } else if (nodes.top()->value > value) {
-                        nodes.top()->leftNode = bfTmp;
-                    } else {
-                        nodes.top()->rightNode = bfTmp;
-                    }
+                }
+
+                bool changeHeight = RotateTree(bfTmp, bf, value);
+                if (nodes.empty()) {
+                    tree = bfTmp;
+                } else if (nodes.top()->value > bfTmp->value) {
+                    nodes.top()->leftNode = bfTmp;
+                } else {
+                    nodes.top()->rightNode = bfTmp;
+                }
+                if (!changeHeight) {
                     break;
                 }
             }

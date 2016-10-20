@@ -62,7 +62,7 @@ void _logPreOrder(BinaryTree tree) {
     if (tree == NULL) {
         return;
     }
-    cout << tree->value << " " ;
+    cout << tree->value << " ";
     _logPreOrder(tree->leftNode);
     _logPreOrder(tree->rightNode);
 
@@ -74,7 +74,7 @@ void _logInOrder(BinaryTree tree) {
         return;
     }
     _logInOrder(tree->leftNode);
-    cout << tree->value << " " ;
+    cout << tree->value << " ";
     _logInOrder(tree->rightNode);
 }
 
@@ -85,7 +85,7 @@ void _logPostorder(BinaryTree tree) {
     }
     _logPostorder(tree->leftNode);
     _logPostorder(tree->rightNode);
-    cout << tree->value << " " ;
+    cout << tree->value << " ";
 }
 
 
@@ -110,6 +110,7 @@ void logPreOrder(BinaryTree tree) {
 
 //中序遍历
 void logInOrder(BinaryTree tree) {
+    int count = 0;
     stack<BinaryTree> s;
     BinaryTree p = tree;
     while (p != NULL || !s.empty()) {
@@ -120,11 +121,12 @@ void logInOrder(BinaryTree tree) {
         if (!s.empty()) {
             p = s.top();
             cout << p->value << " ";
+            count++;
             s.pop();
             p = p->rightNode;
         }
     }
-    cout << endl;
+    cout << endl << "共输出" << count << "个数据" << endl;
 }
 
 //后序遍历
@@ -272,7 +274,7 @@ void deleteNode(BinaryTree &tree, int value) {
                 } else {
                     tmpParent->rightNode = tmp->rightNode;
                 }
-                tmp -> rightNode -> leftNode = tmp -> leftNode ;
+                tmp->rightNode->leftNode = tmp->leftNode;
                 delete tmp;
             } else {
 
@@ -302,3 +304,50 @@ void deleteNode(BinaryTree &tree, int value) {
     }
     logLevel(tree);
 }
+
+int getTreeHeight(BinaryTree tree) {
+    if (tree == NULL) {
+        return 0;
+    }
+    int leftHeight = getTreeHeight(tree->leftNode);
+    int rightHeight = getTreeHeight(tree->rightNode);
+    return max(leftHeight, rightHeight) + 1;
+}
+
+void printTree(BinaryTree tree) {
+    string space = "  ";
+    int treeHeight = getTreeHeight(tree);
+    if (treeHeight == 0) {
+        return;
+    }
+    int i = 0 ;
+    queue<BinaryTree> nodes;
+    queue<BinaryTree> nodes1;
+    nodes.push(tree);
+    while (!nodes.empty() || !nodes1.empty()) {
+
+        if (i == 0){
+            for (int j = 0; j < treeHeight / 2; ++j) {
+                cout << space ;
+            }
+        }
+        BinaryTree tmp = nodes.front();
+        cout << tmp->value <<endl;
+
+        if (tmp->leftNode != NULL) {
+            if (nodes1.empty()){
+                nodes.push(tmp->leftNode);
+            }
+
+        }
+        if (tmp->rightNode != NULL) {
+            nodes.push(tmp->rightNode);
+        }
+        nodes.pop();
+    }
+    cout << endl;
+
+
+
+}
+

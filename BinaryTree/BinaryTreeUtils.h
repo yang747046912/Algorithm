@@ -7,7 +7,7 @@
 #include <iostream>
 #include <queue>
 #include <stack>
-
+#include <string>
 using namespace std;
 
 
@@ -44,4 +44,7 @@ void deleteNode(BinaryTree &tree, int value);
 BinaryTree searchNode(BinaryTree &tree, int value);
 
 
+int getTreeHeight (BinaryTree tree);
+
+void printTree(BinaryTree tree);
 #endif /* BinaryTreeUtils_h */
