@@ -1,10 +1,3 @@
-//
-//  QuickSort.cpp
-//  cyest
-//
-//  Created by 杨才 on 16/10/14.
-//  Copyright © 2016年 杨才. All rights reserved.
-//
 
 #include "QuickSort.h"
 

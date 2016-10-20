@@ -1,10 +1,3 @@
-//
-//  BinaryTreeUtils.cpp
-//  cyest
-//
-//  Created by 杨才 on 16/10/16.
-//  Copyright © 2016年 杨才. All rights reserved.
-//
 
 #include "BinaryTreeUtils.h"
 
@@ -92,7 +85,7 @@ void _logPostorder(BinaryTree tree) {
     }
     _logPostorder(tree->leftNode);
     _logPostorder(tree->rightNode);
-    cout << tree->value << " " << ends;
+    cout << tree->value << " " ;
 }
 
 
