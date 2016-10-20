@@ -272,6 +272,7 @@ void deleteNode(BinaryTree &tree, int value) {
                 } else {
                     tmpParent->rightNode = tmp->rightNode;
                 }
+                tmp -> rightNode -> leftNode = tmp -> leftNode ;
                 delete tmp;
             } else {
 

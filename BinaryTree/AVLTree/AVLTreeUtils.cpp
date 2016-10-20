@@ -217,6 +217,7 @@ void deleteNodeAVL(AVLTree &tree, int value) {
             } else {
                 tmpParent->leftNode = tmp->rightNode;
             }
+            tmp -> rightNode -> leftNode = tmp -> leftNode ;
             delete tmp;
         } else {
             queue<AVLTree> minNodes;
