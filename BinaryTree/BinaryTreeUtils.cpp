@@ -300,5 +300,5 @@ void deleteNode(BinaryTree &tree, int value) {
         }
         cout << "删除成功 " << value << " ..." << endl;
     }
-
+    logLevel(tree);
 }
