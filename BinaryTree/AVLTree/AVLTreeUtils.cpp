@@ -77,10 +77,10 @@ bool RotateTree(AVLTree &root, int bf, int value) {
     if (bf == 2) {
         cout << "root ->leftNode -> BF:" << root->leftNode->BF << endl;
         if (root->leftNode->BF == 1) {
-            cout << "插入" << value << ",发生LL旋转" << endl;
+            cout << "插入/删除" << value << ",发生LL旋转" << endl;
             RotateLL(root);
         } else if (root->leftNode->BF == -1) {
-            cout << "插入" << value << ",发生LR旋转" << endl;
+            cout << "插入/删除" << value << ",发生LR旋转" << endl;
             RotateLR(root);
         } else {
             RotateLL(root);
@@ -89,10 +89,10 @@ bool RotateTree(AVLTree &root, int bf, int value) {
     } else if (bf == -2) {
         cout << "root ->rightNode -> BF:" << root->rightNode->BF << endl;
         if (root->rightNode->BF == 1) {
-            cout << "插入" << value << ",发生RL旋转" << endl;
+            cout << "插入/删除" << value << ",发生RL旋转" << endl;
             RotateRL(root);
         } else if (root->rightNode->BF == -1) {
-            cout << "插入" << value << ",发生RR旋转" << endl;
+            cout << "插入/删除" << value << ",发生RR旋转" << endl;
             RotateRR(root);
         } else {
             RotateRR(root);
@@ -184,6 +184,7 @@ void RotateRL(AVLTree &root) {
 }
 
 void deleteNodeAVL(AVLTree &tree, int value) {
+    int deleteValue = value ;
     AVLTree tmp = tree;
     AVLTree tmpParent = NULL;
     stack<AVLTree> nodes;
@@ -200,31 +201,45 @@ void deleteNodeAVL(AVLTree &tree, int value) {
         cout << "没有找到 " << value << " 无法删除 ..." << endl;
     } else {
         cout << "我找到啦 " << value << " 正在删除 ..." << endl;
+
+
+
         if (tmp->rightNode == NULL) {
             if (tmp->leftNode == NULL) {
-                logPreOrder(tree);
-                logInOrder(tree);
-                return;
-            }
-            AVLTree tmpLeft = tmp->leftNode;
-            tmp->value = tmpLeft->value;
-            tmp->rightNode = tmpLeft->rightNode;
-            tmp->leftNode = tmpLeft->leftNode;
-            tmp->BF -= 1;
-            delete tmpLeft;
-            if (tmp->BF == -2) {
-                bool changeHeight = RotateTree(tmp, -2, value);
                 if (tmpParent == NULL) {
-                    tree = tmp;
-                } else if (tmp->value > tmpParent->value) {
-                    tmpParent->rightNode = tmp;
-                } else {
-                    tmpParent->leftNode = tmp;
-                }
-                if (!changeHeight) {
+                    tree = NULL;
                     logPreOrder(tree);
                     logInOrder(tree);
                     return;
+                } else {
+                    if (tmpParent->value > tmp->value) {
+                        tmpParent->leftNode = NULL;
+                    } else {
+                        tmpParent->rightNode = NULL;
+                    }
+                }
+            } else {
+                AVLTree tmpLeft = tmp->leftNode;
+                tmp->value = tmpLeft->value;
+                tmp->rightNode = tmpLeft->rightNode;
+                tmp->leftNode = tmpLeft->leftNode;
+                tmp->BF -= 1;
+                delete tmpLeft;
+
+                if (tmp->BF == -2) {
+                    bool changeHeight = RotateTree(tmp, -2, value);
+                    if (tmpParent == NULL) {
+                        tree = tmp;
+                    } else if (tmp->value > tmpParent->value) {
+                        tmpParent->rightNode = tmp;
+                    } else {
+                        tmpParent->leftNode = tmp;
+                    }
+                    if (!changeHeight) {
+                        logPreOrder(tree);
+                        logInOrder(tree);
+                        return;
+                    }
                 }
             }
         } else if (tmp->rightNode->leftNode == NULL) {
@@ -248,8 +263,6 @@ void deleteNodeAVL(AVLTree &tree, int value) {
                     return;
                 }
             }
-
-
         } else {
             nodes.push(tmp);
             AVLTree minTmp = tmp->rightNode;
@@ -261,6 +274,7 @@ void deleteNodeAVL(AVLTree &tree, int value) {
             nodes.pop();
             nodes.top()->leftNode = minTmp->rightNode;
             tmp->value = minTmp->value;
+            deleteValue = minTmp ->value ;
             delete minTmp;
         }
         cout << "删除成功 " << value << " ..." << endl;
@@ -269,7 +283,7 @@ void deleteNodeAVL(AVLTree &tree, int value) {
             int bf;
             AVLTree bfTmp = nodes.top();
             nodes.pop();
-            if (bfTmp->value > value) {
+            if (bfTmp->value > deleteValue) {
                 bf = -1;
             } else {
                 bf = 1;
