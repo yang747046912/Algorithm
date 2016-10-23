@@ -10,6 +10,8 @@ void createBRTree(BRtree &root, int *array, int n);
 
 void insertBRTree(BRtree &root, int value);
 
+void deleteBRTree(BRtree &root, int value);
+
 void roateLL(BRtree &root);
 
 void roateLR(BRtree &root);
@@ -17,3 +19,7 @@ void roateLR(BRtree &root);
 void roateRR(BRtree &root);
 
 void roateRL(BRtree &root);
+
+void logBRTree(BRtree root);
+
+bool isBlackOrNull(BRtree root);

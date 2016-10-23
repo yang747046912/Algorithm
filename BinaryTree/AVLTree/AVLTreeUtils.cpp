@@ -1,321 +1,1 @@
-
-#include "AVLTreeUtils.h"
-
-void creatTreeAVL(AVLTree &tree, int array[], int n) {
-    for (int i = 0; i < n; i++) {
-        insertNodeAVL(tree, array[i]);
-    }
-    logPreOrder(tree);
-}
-
-void insertNodeAVL(AVLTree &tree, int value) {
-    stack<AVLTree> nodes;
-    AVLTree tmp = tree;
-    AVLTree tmpParent = NULL;
-    while (tmp != NULL && tmp->value != value) {
-        tmpParent = tmp;
-        nodes.push(tmpParent);
-        if (tmp->value > value) {
-            tmp = tmp->leftNode;
-        } else {
-            tmp = tmp->rightNode;
-        }
-    }
-    if (tmp != NULL) {
-        cout << value << " å·²ç»å­˜åœ¨,æ— æ³•æ’å…¥" << endl;
-        return;
-    }
-    tmp = new TreeNode();
-    tmp->value = value;
-    tmp->BF = 0;
-    tmp->leftNode = NULL;
-    tmp->rightNode = NULL;
-    if (tmpParent == NULL) {
-        tree = tmp;
-    } else if (tmpParent->value > tmp->value) {
-        tmpParent->leftNode = tmp;
-    } else {
-        tmpParent->rightNode = tmp;
-    }
-    while (!nodes.empty()) {
-        tmpParent = nodes.top();
-        nodes.pop();
-        int bf = tmpParent->value > value ? 1 : -1;
-        tmpParent->BF = tmpParent->BF + bf;
-        bf = tmpParent->BF;
-        if (bf == 0) {
-            break;
-        }
-        if (bf == 2 || bf == -2) {
-            RotateTree(tmpParent, bf, value);
-            if (nodes.empty()) {
-                tree = tmpParent;
-            } else if (nodes.top()->value > value) {
-                nodes.top()->leftNode = tmpParent;
-            } else {
-                nodes.top()->rightNode = tmpParent;
-            }
-            break;
-        }
-    }
-
-}
-
-//1.å½“æ—‹è½¬æ ¹çš„BFå€¼ä¸º2æ—¶ï¼š
-//
-//å¦‚æœæ—‹è½¬æ ¹çš„å·¦å­©å­çš„BFå€¼ä¸º1ï¼Œåˆ™è¿›è¡ŒLLå‹æ—‹è½¬ï¼›
-//
-//å¦‚æœæ—‹è½¬æ ¹çš„å·¦å­©å­çš„BFå€¼ä¸º-1ï¼Œåˆ™è¿›è¡ŒLRå‹æ—‹è½¬ã€‚
-//
-//2.å½“æ—‹è½¬æ ¹çš„BFå€¼ä¸º-2æ—¶ï¼š
-//
-//å¦‚æœæ—‹è½¬æ ¹çš„å³å­©å­çš„BFå€¼ä¸º1ï¼Œåˆ™è¿›è¡ŒRLå‹æ—‹è½¬ï¼›
-//
-//å¦‚æœæ—‹è½¬æ ¹çš„å³å­©å­çš„BFå€¼ä¸º-1ï¼Œåˆ™è¿›è¡ŒRRå‹æ—‹è½¬ã€‚
-bool RotateTree(AVLTree &root, int bf, int value) {
-    cout << "bf:" << bf << " ";
-    if (bf == 2) {
-        cout << "root ->leftNode -> BF:" << root->leftNode->BF << endl;
-        if (root->leftNode->BF == 1) {
-            cout << "æ’å…¥/åˆ é™¤" << value << ",å‘ç”ŸLLæ—‹è½¬" << endl;
-            RotateLL(root);
-        } else if (root->leftNode->BF == -1) {
-            cout << "æ’å…¥/åˆ é™¤" << value << ",å‘ç”ŸLRæ—‹è½¬" << endl;
-            RotateLR(root);
-        } else {
-            RotateLL(root);
-            return false;
-        }
-    } else if (bf == -2) {
-        cout << "root ->rightNode -> BF:" << root->rightNode->BF << endl;
-        if (root->rightNode->BF == 1) {
-            cout << "æ’å…¥/åˆ é™¤" << value << ",å‘ç”ŸRLæ—‹è½¬" << endl;
-            RotateRL(root);
-        } else if (root->rightNode->BF == -1) {
-            cout << "æ’å…¥/åˆ é™¤" << value << ",å‘ç”ŸRRæ—‹è½¬" << endl;
-            RotateRR(root);
-        } else {
-            RotateRR(root);
-            return false;
-        }
-    }
-    return true;
-}
-
-void RotateLL(AVLTree &root) {
-    AVLTree rootNext = root->leftNode;
-    root->leftNode = rootNext->rightNode;
-    rootNext->rightNode = root;
-    if (rootNext->BF == 1) {
-        rootNext->BF = 0;
-        root->BF = 0;
-    } else {//rootNext -> BF== 0 çš„æƒ…å†µï¼Œåˆ é™¤æ—¶ç”¨
-        rootNext->BF = -1;
-        root->BF = 1;
-    }
-    root = rootNext;
-}
-
-void RotateLR(AVLTree &root) {
-    AVLTree rootNext = root->leftNode;
-    AVLTree newRoot = rootNext->rightNode;
-    root->leftNode = newRoot->rightNode;
-    rootNext->rightNode = newRoot->leftNode;
-    newRoot->leftNode = rootNext;
-    newRoot->rightNode = root;
-    switch (newRoot->BF) //æ”¹å˜å¹³è¡¡å› å­
-    {
-        case 0:
-            root->BF = 0;
-            rootNext->BF = 0;
-            break;
-        case 1:
-            root->BF = -1;
-            rootNext->BF = 0;
-            break;
-        case -1:
-            root->BF = 0;
-            rootNext->BF = 1;
-            break;
-    }
-    newRoot->BF = 0;
-    root = newRoot;
-}
-
-void RotateRR(AVLTree &root) {
-    AVLTree rootNext = root->rightNode;
-    root->rightNode = rootNext->leftNode;
-    rootNext->leftNode = root;
-
-    if (rootNext->BF == -1) {
-        root->BF = 0;
-        rootNext->BF = 0;
-    } else { //rootNext -> BF== 0 çš„æƒ…å†µï¼Œåˆ é™¤æ—¶ç”¨
-        root->BF = -1;
-        rootNext->BF = 1;
-    }
-    root = rootNext;
-}
-
-void RotateRL(AVLTree &root) {
-    AVLTree rootNext = root->rightNode;
-    AVLTree newRoot = rootNext->leftNode;
-    root->rightNode = newRoot->leftNode;
-    rootNext->leftNode = newRoot->rightNode;
-    newRoot->leftNode = root;
-    newRoot->rightNode = rootNext;
-    switch (newRoot->BF) //æ”¹å˜å¹³è¡¡å› å­
-    {
-        case 0:
-            root->BF = 0;
-            rootNext->BF = 0;
-            break;
-        case 1:
-            root->BF = 0;
-            rootNext->BF = -1;
-            break;
-        case -1:
-            root->BF = 1;
-            rootNext->BF = 0;
-            break;
-    }
-    newRoot->BF = 0;
-    root = newRoot;
-}
-
-void deleteNodeAVL(AVLTree &tree, int value) {
-    int deleteValue = value ;
-    AVLTree tmp = tree;
-    AVLTree tmpParent = NULL;
-    stack<AVLTree> nodes;
-    while (tmp != NULL && tmp->value != value) {
-        tmpParent = tmp;
-        nodes.push(tmp);
-        if (tmp->value > value) {
-            tmp = tmp->leftNode;
-        } else {
-            tmp = tmp->rightNode;
-        }
-    }
-    if (tmp == NULL) {
-        cout << "æ²¡æœ‰æ‰¾åˆ° " << value << " æ— æ³•åˆ é™¤ ..." << endl;
-    } else {
-        cout << "æˆ‘æ‰¾åˆ°å•¦ " << value << " æ­£åœ¨åˆ é™¤ ..." << endl;
-
-
-
-        if (tmp->rightNode == NULL) {
-            if (tmp->leftNode == NULL) {
-                if (tmpParent == NULL) {
-                    tree = NULL;
-                    logPreOrder(tree);
-                    logInOrder(tree);
-                    return;
-                } else {
-                    if (tmpParent->value > tmp->value) {
-                        tmpParent->leftNode = NULL;
-                    } else {
-                        tmpParent->rightNode = NULL;
-                    }
-                }
-            } else {
-                AVLTree tmpLeft = tmp->leftNode;
-                tmp->value = tmpLeft->value;
-                tmp->rightNode = tmpLeft->rightNode;
-                tmp->leftNode = tmpLeft->leftNode;
-                tmp->BF -= 1;
-                delete tmpLeft;
-
-                if (tmp->BF == -2) {
-                    bool changeHeight = RotateTree(tmp, -2, value);
-                    if (tmpParent == NULL) {
-                        tree = tmp;
-                    } else if (tmp->value > tmpParent->value) {
-                        tmpParent->rightNode = tmp;
-                    } else {
-                        tmpParent->leftNode = tmp;
-                    }
-                    if (!changeHeight) {
-                        logPreOrder(tree);
-                        logInOrder(tree);
-                        return;
-                    }
-                }
-            }
-        } else if (tmp->rightNode->leftNode == NULL) {
-            AVLTree tmpRight = tmp->rightNode;
-            tmp->value = tmpRight->value;
-            tmp->rightNode = tmpRight->rightNode;
-            tmp->BF += 1;
-            delete tmpRight;
-            if (tmp->BF == 2) {
-                bool changeHeight = RotateTree(tmp, 2, value);
-                if (tmpParent == NULL) {
-                    tree = tmp;
-                } else if (tmp->value > tmpParent->value) {
-                    tmpParent->rightNode = tmp;
-                } else {
-                    tmpParent->leftNode = tmp;
-                }
-                if (!changeHeight) {
-                    logPreOrder(tree);
-                    logInOrder(tree);
-                    return;
-                }
-            }
-        } else {
-            nodes.push(tmp);
-            AVLTree minTmp = tmp->rightNode;
-            nodes.push(minTmp);
-            while (minTmp->leftNode != NULL) {
-                minTmp = minTmp->leftNode;
-                nodes.push(minTmp);
-            }
-            nodes.pop();
-            nodes.top()->leftNode = minTmp->rightNode;
-            tmp->value = minTmp->value;
-            deleteValue = minTmp ->value ;
-            delete minTmp;
-        }
-        cout << "åˆ é™¤æˆåŠŸ " << value << " ..." << endl;
-        cout << "æ­£åœ¨é‡æ–°æ„é€ AVLæ ‘" << endl;
-        while (!nodes.empty()) {
-            int bf;
-            AVLTree bfTmp = nodes.top();
-            nodes.pop();
-            if (bfTmp->value > deleteValue) {
-                bf = -1;
-            } else {
-                bf = 1;
-            }
-            bfTmp->BF = bfTmp->BF + bf;
-            bf = bfTmp->BF;
-            if (bf != 0) {//å¦‚æœbf==0ï¼Œè¡¨æ˜é«˜åº¦é™ä½ï¼Œç»§ç»­åä¸Šå›æº¯
-                //å¦‚æœbfä¸º1æˆ–-1åˆ™è¯´æ˜é«˜åº¦æœªå˜ï¼Œåœæ­¢å›æº¯ï¼Œå¦‚æœä¸º2æˆ–-2ï¼Œåˆ™è¿›è¡Œæ—‹è½¬
-                //å½“æ—‹è½¬åé«˜åº¦ä¸å˜ï¼Œåˆ™åœæ­¢å›æº¯
-                if (bf == 1 || bf == -1) {
-                    break;
-                }
-
-                bool changeHeight = RotateTree(bfTmp, bf, value);
-                if (nodes.empty()) {
-                    tree = bfTmp;
-                } else if (nodes.top()->value > bfTmp->value) {
-                    nodes.top()->leftNode = bfTmp;
-                } else {
-                    nodes.top()->rightNode = bfTmp;
-                }
-                if (!changeHeight) {
-                    break;
-                }
-            }
-        }
-    }
-    logPreOrder(tree);
-    logInOrder(tree);
-    cout << endl;
-}
-
-void deleteNodeAVL(AVLTree &tree, AVLTree node) {
-
-}
+#include "AVLTreeUtils.h"void creatTreeAVL(AVLTree &tree, int array[], int n) {    for (int i = 0; i < n; i++) {        insertNodeAVL(tree, array[i]);    }    logPreOrder(tree);}void insertNodeAVL(AVLTree &tree, int value) {    stack<AVLTree> nodes;    AVLTree tmp = tree;    AVLTree tmpParent = NULL;    while (tmp != NULL && tmp->value != value) {        tmpParent = tmp;        nodes.push(tmpParent);        if (tmp->value > value) {            tmp = tmp->leftNode;        } else {            tmp = tmp->rightNode;        }    }    if (tmp != NULL) {        cout << value << " ÒÑ¾­´æÔÚ,ÎŞ·¨²åÈë" << endl;        return;    }    tmp = new TreeNode();    tmp->value = value;    tmp->BF = 0;    tmp->leftNode = NULL;    tmp->rightNode = NULL;    if (tmpParent == NULL) {        tree = tmp;    } else if (tmpParent->value > tmp->value) {        tmpParent->leftNode = tmp;    } else {        tmpParent->rightNode = tmp;    }    while (!nodes.empty()) {        tmpParent = nodes.top();        nodes.pop();        int bf = tmpParent->value > value ? 1 : -1;        tmpParent->BF = tmpParent->BF + bf;        bf = tmpParent->BF;        if (bf == 0) {            break;        }        if (bf == 2 || bf == -2) {            RotateTree(tmpParent, bf, value);            if (nodes.empty()) {                tree = tmpParent;            } else if (nodes.top()->value > value) {                nodes.top()->leftNode = tmpParent;            } else {                nodes.top()->rightNode = tmpParent;            }            break;        }    }}//1.µ±Ğı×ª¸ùµÄBFÖµÎª2Ê±£º////Èç¹ûĞı×ª¸ùµÄ×óº¢×ÓµÄBFÖµÎª1£¬Ôò½øĞĞLLĞÍĞı×ª£»////Èç¹ûĞı×ª¸ùµÄ×óº¢×ÓµÄBFÖµÎª-1£¬Ôò½øĞĞLRĞÍĞı×ª¡£////2.µ±Ğı×ª¸ùµÄBFÖµÎª-2Ê±£º////Èç¹ûĞı×ª¸ùµÄÓÒº¢×ÓµÄBFÖµÎª1£¬Ôò½øĞĞRLĞÍĞı×ª£»////Èç¹ûĞı×ª¸ùµÄÓÒº¢×ÓµÄBFÖµÎª-1£¬Ôò½øĞĞRRĞÍĞı×ª¡£bool RotateTree(AVLTree &root, int bf, int value) {    cout << "bf:" << bf << " ";    if (bf == 2) {        cout << "root ->leftNode -> BF:" << root->leftNode->BF << endl;        if (root->leftNode->BF == 1) {            cout << "²åÈë/É¾³ı" << value << ",·¢ÉúLLĞı×ª" << endl;            RotateLL(root);        } else if (root->leftNode->BF == -1) {            cout << "²åÈë/É¾³ı" << value << ",·¢ÉúLRĞı×ª" << endl;            RotateLR(root);        } else {            RotateLL(root);            return false;        }    } else if (bf == -2) {        cout << "root ->rightNode -> BF:" << root->rightNode->BF << endl;        if (root->rightNode->BF == 1) {            cout << "²åÈë/É¾³ı" << value << ",·¢ÉúRLĞı×ª" << endl;            RotateRL(root);        } else if (root->rightNode->BF == -1) {            cout << "²åÈë/É¾³ı" << value << ",·¢ÉúRRĞı×ª" << endl;            RotateRR(root);        } else {            RotateRR(root);            return false;        }    }    return true;}void RotateLL(AVLTree &root) {    AVLTree rootNext = root->leftNode;    root->leftNode = rootNext->rightNode;    rootNext->rightNode = root;    if (rootNext->BF == 1) {        rootNext->BF = 0;        root->BF = 0;    } else {//rootNext -> BF== 0 µÄÇé¿ö£¬É¾³ıÊ±ÓÃ        rootNext->BF = -1;        root->BF = 1;    }    root = rootNext;}void RotateLR(AVLTree &root) {    AVLTree rootNext = root->leftNode;    AVLTree newRoot = rootNext->rightNode;    root->leftNode = newRoot->rightNode;    rootNext->rightNode = newRoot->leftNode;    newRoot->leftNode = rootNext;    newRoot->rightNode = root;    switch (newRoot->BF) //¸Ä±äÆ½ºâÒò×Ó    {        case 0:            root->BF = 0;            rootNext->BF = 0;            break;        case 1:            root->BF = -1;            rootNext->BF = 0;            break;        case -1:            root->BF = 0;            rootNext->BF = 1;            break;    }    newRoot->BF = 0;    root = newRoot;}void RotateRR(AVLTree &root) {    AVLTree rootNext = root->rightNode;    root->rightNode = rootNext->leftNode;    rootNext->leftNode = root;    if (rootNext->BF == -1) {        root->BF = 0;        rootNext->BF = 0;    } else { //rootNext -> BF== 0 µÄÇé¿ö£¬É¾³ıÊ±ÓÃ        root->BF = -1;        rootNext->BF = 1;    }    root = rootNext;}void RotateRL(AVLTree &root) {    AVLTree rootNext = root->rightNode;    AVLTree newRoot = rootNext->leftNode;    root->rightNode = newRoot->leftNode;    rootNext->leftNode = newRoot->rightNode;    newRoot->leftNode = root;    newRoot->rightNode = rootNext;    switch (newRoot->BF) //¸Ä±äÆ½ºâÒò×Ó    {        case 0:            root->BF = 0;            rootNext->BF = 0;            break;        case 1:            root->BF = 0;            rootNext->BF = -1;            break;        case -1:            root->BF = 1;            rootNext->BF = 0;            break;    }    newRoot->BF = 0;    root = newRoot;}void deleteNodeAVL(AVLTree &tree, int value) {    int deleteValue = value ;    AVLTree tmp = tree;    AVLTree tmpParent = NULL;    stack<AVLTree> nodes;    while (tmp != NULL && tmp->value != value) {        tmpParent = tmp;        nodes.push(tmp);        if (tmp->value > value) {            tmp = tmp->leftNode;        } else {            tmp = tmp->rightNode;        }    }    if (tmp == NULL) {        cout << "Ã»ÓĞÕÒµ½ " << value << " ÎŞ·¨É¾³ı ..." << endl;    } else {        cout << "ÎÒÕÒµ½À² " << value << " ÕıÔÚÉ¾³ı ..." << endl;        if (tmp->rightNode == NULL) {            if (tmp->leftNode == NULL) {                if (tmpParent == NULL) {                    tree = NULL;                    logPreOrder(tree);                    logInOrder(tree);                    return;                } else {                    if (tmpParent->value > tmp->value) {                        tmpParent->leftNode = NULL;                    } else {                        tmpParent->rightNode = NULL;                    }                }            } else {                AVLTree tmpLeft = tmp->leftNode;                tmp->value = tmpLeft->value;                tmp->rightNode = tmpLeft->rightNode;                tmp->leftNode = tmpLeft->leftNode;                tmp->BF -= 1;                delete tmpLeft;                if (tmp->BF == -2) {                    bool changeHeight = RotateTree(tmp, -2, value);                    if (tmpParent == NULL) {                        tree = tmp;                    } else if (tmp->value > tmpParent->value) {                        tmpParent->rightNode = tmp;                    } else {                        tmpParent->leftNode = tmp;                    }                    if (!changeHeight) {                        logPreOrder(tree);                        logInOrder(tree);                        return;                    }                }            }        } else if (tmp->rightNode->leftNode == NULL) {            AVLTree tmpRight = tmp->rightNode;            tmp->value = tmpRight->value;            tmp->rightNode = tmpRight->rightNode;            tmp->BF += 1;            delete tmpRight;            if (tmp->BF == 2) {                bool changeHeight = RotateTree(tmp, 2, value);                if (tmpParent == NULL) {                    tree = tmp;                } else if (tmp->value > tmpParent->value) {                    tmpParent->rightNode = tmp;                } else {                    tmpParent->leftNode = tmp;                }                if (!changeHeight) {                    logPreOrder(tree);                    logInOrder(tree);                    return;                }            }        } else {            nodes.push(tmp);            AVLTree minTmp = tmp->rightNode;            nodes.push(minTmp);            while (minTmp->leftNode != NULL) {                minTmp = minTmp->leftNode;                nodes.push(minTmp);            }            nodes.pop();            nodes.top()->leftNode = minTmp->rightNode;            tmp->value = minTmp->value;            deleteValue = minTmp ->value ;            delete minTmp;        }        cout << "É¾³ı³É¹¦ " << value << " ..." << endl;        cout << "ÕıÔÚÖØĞÂ¹¹ÔìAVLÊ÷" << endl;        while (!nodes.empty()) {            int bf;            AVLTree bfTmp = nodes.top();            nodes.pop();            if (bfTmp->value > deleteValue) {                bf = -1;            } else {                bf = 1;            }            bfTmp->BF = bfTmp->BF + bf;            bf = bfTmp->BF;            if (bf != 0) {//Èç¹ûbf==0£¬±íÃ÷¸ß¶È½µµÍ£¬¼ÌĞøºóÉÏ»ØËİ                //Èç¹ûbfÎª1»ò-1ÔòËµÃ÷¸ß¶ÈÎ´±ä£¬Í£Ö¹»ØËİ£¬Èç¹ûÎª2»ò-2£¬Ôò½øĞĞĞı×ª                //µ±Ğı×ªºó¸ß¶È²»±ä£¬ÔòÍ£Ö¹»ØËİ                if (bf == 1 || bf == -1) {                    break;                }                bool changeHeight = RotateTree(bfTmp, bf, value);                if (nodes.empty()) {                    tree = bfTmp;                } else if (nodes.top()->value > bfTmp->value) {                    nodes.top()->leftNode = bfTmp;                } else {                    nodes.top()->rightNode = bfTmp;                }                if (!changeHeight) {                    break;                }            }        }    }    logPreOrder(tree);    logInOrder(tree);    cout << endl;}void deleteNodeAVL(AVLTree &tree, AVLTree node) {}
